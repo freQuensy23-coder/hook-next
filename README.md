@@ -4,6 +4,9 @@
 
 You want to queue a follow-up task for Claude Code while it's mid-turn, without interrupting its current work and without burning an extra LLM call on the queueing itself.
 
+TLDR: Enter comand -> press enter, comand start working after next tool call, not when calude finish current task
+Codex have 'Tab' comand, but claude code dont.
+
 ## How it works
 
 `qnext "text"` writes the text to `/tmp/claude-next-<session_id>.txt`, deriving `session_id` from the most-recent `.jsonl` in `~/.claude/projects/<cwd-encoded>/`. A `Stop` hook reads that file when Claude's turn ends and emits `{"decision":"block","reason":"<text>"}`, which Claude Code treats as the next instruction.
