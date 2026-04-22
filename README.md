@@ -4,8 +4,8 @@
 
 You want to queue a follow-up task for Claude Code while it's mid-turn, without interrupting its current work and without burning an extra LLM call on the queueing itself.
 
-TLDR: Enter comand -> press enter, comand start working after next tool call, not when calude finish current task
-Codex have 'Tab' comand, but claude code dont.
+*TLDR: Enter comand -> press enter, comand start working after next tool call, not when calude finish current task
+Codex have 'Tab' comand, but claude code dont.*
 
 ## How it works
 
