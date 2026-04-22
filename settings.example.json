@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/PycharmProjects/hook-next/hooks/queue_next.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/PycharmProjects/hook-next/hooks/feed_next.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
