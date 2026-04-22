@@ -1,12 +1,12 @@
 # hook-next
 
-Queue a prompt for Claude Code that runs when the current turn ends.
+## Problem
 
-```sh
-qnext "then run the tests"
-```
+You want to queue a follow-up task for Claude Code while it's mid-turn, without interrupting its current work and without burning an extra LLM call on the queueing itself.
 
-Works mid-turn from a separate terminal. The `Stop` hook picks up `/tmp/claude-next-<session_id>.txt` and feeds its contents back as the next prompt. `qnext` derives `session_id` from the most-recent `.jsonl` in `~/.claude/projects/<cwd-encoded>/`.
+## How it works
+
+`qnext "text"` writes the text to `/tmp/claude-next-<session_id>.txt`, deriving `session_id` from the most-recent `.jsonl` in `~/.claude/projects/<cwd-encoded>/`. A `Stop` hook reads that file when Claude's turn ends and emits `{"decision":"block","reason":"<text>"}`, which Claude Code treats as the next instruction.
 
 ## Install
 

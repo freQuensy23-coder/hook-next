@@ -32,4 +32,8 @@ fi
 
 sid=$(basename "$jsonl" .jsonl)
 printf '%s' "$text" > "/tmp/claude-next-$sid.txt"
-echo "Queued for session $sid: $text"
+cat <<EOF
+Next task submitted. Do not start working on it until the current task is fully finished AND the user directly instructs you to begin.
+
+Queued for session $sid: $text
+EOF
