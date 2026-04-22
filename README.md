@@ -1,56 +1,30 @@
 # hook-next
 
-Queue a follow-up prompt for Claude Code that auto-fires when the current turn ends. Zero extra LLM calls for the queueing step.
-
-## What it does
-
-While Claude is mid-turn, type:
+Queue a prompt for Claude Code to run as soon as it finishes the current turn. No extra LLM call for the queueing itself.
 
 ```
-next: run the tests after you finish
+> next: run the tests when you're done
+> fix the bug in foo.py
 ```
 
-The text is stashed to `/tmp/claude-next-<session_id>.txt` and the prompt is blocked from ever reaching the model. When Claude finishes its current turn, a `Stop` hook reads the file and feeds the queued text back as the next instruction.
+Claude fixes the bug, stops, then picks up "run the tests" on its own.
 
-Result: you get a simple "task queue" built entirely out of Claude Code hooks, with per-session isolation.
-
-## How it works
+## How
 
 Two hooks in `~/.claude/settings.json`:
 
-| Hook | Trigger | Effect |
-|---|---|---|
-| `UserPromptSubmit` | You submit a prompt | If prompt starts with `next: `, write rest to queue file, `exit 2` to block the prompt. No LLM call. |
-| `Stop` | Claude ends a turn | If queue file exists for this `session_id`, emit `{"decision":"block","reason":"<text>"}` on stdout. Claude Code continues the turn with that text as the next instruction. |
+- `UserPromptSubmit` — if the prompt starts with `next: `, write the rest to `/tmp/claude-next-<session_id>.txt` and `exit 2` so the prompt never reaches the model.
+- `Stop` — when the turn ends, if that file exists, print `{"decision":"block","reason":"<contents>"}` to stdout. Claude Code treats that as "don't stop, use this as the next instruction."
 
-Per-session isolation comes from keying the queue file on `session_id` (provided on stdin to every hook), so parallel Claude Code sessions don't collide.
+`session_id` is on stdin for both hooks, so parallel sessions don't clobber each other.
 
 ## Install
 
-1. Clone somewhere:
-   ```sh
-   git clone <repo> ~/PycharmProjects/hook-next
-   chmod +x ~/PycharmProjects/hook-next/hooks/*.sh
-   ```
-2. Merge `settings.example.json` into `~/.claude/settings.json` (or wire the hooks into a project-local `.claude/settings.json`). If you already have hooks, add these under the existing `"hooks"` key.
-3. Start a new Claude Code session (hooks load at session start).
-
-## Usage
-
-```
-> next: after you finish, list all .md files in this repo
-> what's 2+2?
+```sh
+git clone git@github.com:freQuensy23-coder/hook-next.git ~/PycharmProjects/hook-next
+chmod +x ~/PycharmProjects/hook-next/hooks/*.sh
 ```
 
-Claude answers "4", stops, Stop hook fires, Claude continues with the listing.
+Merge `settings.example.json` into `~/.claude/settings.json` under the existing `"hooks"` key. Start a new Claude Code session — hooks only load at session start.
 
-## Requirements
-
-- `bash`, `jq`
-- Claude Code (tested on 2.1.x)
-
-## Files
-
-- `hooks/queue_next.sh` — `UserPromptSubmit` handler
-- `hooks/feed_next.sh` — `Stop` handler
-- `settings.example.json` — hook wiring you merge into `~/.claude/settings.json`
+Needs `bash` and `jq`.
