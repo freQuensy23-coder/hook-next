@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# qnext: queue a follow-up prompt for the active Claude Code session.
+# Writes the argument to /tmp/claude-next-<session_id>.txt where the
+# Stop hook will pick it up at end of the current turn.
+set -euo pipefail
+
+if [ $# -lt 1 ]; then
+    echo "usage: qnext <text to queue as next prompt>" >&2
+    exit 1
+fi
+
+text="$*"
+
+# Claude Code stores each session's transcript at
+#   ~/.claude/projects/<cwd-encoded>/<session_id>.jsonl
+# where <cwd-encoded> replaces '/' and '.' with '-'.
+enc=$(pwd | sed 's|[/.]|-|g')
+dir="$HOME/.claude/projects/$enc"
+
+jsonl=$(ls -t "$dir"/*.jsonl 2>/dev/null | head -1 || true)
+
+# Fallback: most recent transcript anywhere (case: running qnext from a
+# different cwd than the Claude Code session).
+if [ -z "$jsonl" ]; then
+    jsonl=$(ls -t "$HOME/.claude/projects"/*/*.jsonl 2>/dev/null | head -1 || true)
+fi
+
+if [ -z "$jsonl" ]; then
+    echo "qnext: no Claude Code transcripts found under ~/.claude/projects" >&2
+    exit 1
+fi
+
+sid=$(basename "$jsonl" .jsonl)
+printf '%s' "$text" > "/tmp/claude-next-$sid.txt"
+echo "Queued for session $sid: $text"
